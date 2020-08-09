@@ -37,6 +37,16 @@
   (format stream "#<~S TEXT=~S>" 'listitem (gt-text object)))
 
 
+(defclass blockquote ()
+  ((text :type string :initarg :text :accessor gt-text)))
+
+(defun blockquote (text)
+  (make-instance 'blockquote :text text))
+
+(defmethod print-object ((object blockquote) stream)
+  (format stream "#<~S TEXT=~S>" 'blockquote (gt-text object)))
+
+
 (defclass verbatim ()
   ((alt :type string :initform "" :initarg :alt :accessor gt-alt)
    (text :type string :initarg :text :accessor gt-text)))

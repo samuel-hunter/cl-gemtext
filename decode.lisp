@@ -36,10 +36,15 @@
             (link href (read-line stream)))
         (end-of-file () (link href))))))
 
+(defun decode-blockquote (line)
+  "Decode a blockquote from a prefix-stripped LINE."
+  (with-input-from-string (stream line)
+    (peek-char t stream nil) ;; skip all preceding whitespace
+    (blockquote (read-line stream nil ""))))
+
 (defun decode-verbatim (alt)
   (declare (ignore alt))
   (error "Can't decode verbatim yet"))
-
 
 ;; decode dispatch
 
@@ -56,6 +61,7 @@
   ("## " (curry 'heading 2))
   ("### " (curry 'heading 3))
   ("* " 'listitem)
+  (">" 'decode-blockquote)
   ("```" 'decode-verbatim))
 
 (defun find-decoder (line)

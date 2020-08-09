@@ -12,6 +12,7 @@
            #:link
            #:heading
            #:listitem
+           #:blockquote
            #:verbatim
            #:gt-href
            #:gt-label
