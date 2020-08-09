@@ -17,6 +17,8 @@
         :finally (return (copy-seq result)) ;; return a non-adjustable copy of the string
         ))
 
+;; TODO (defun string-trim-if ...)
+
 ;; special decoders
 
 (defun decode-link (line)
@@ -39,7 +41,9 @@
 (defun decode-blockquote (line)
   "Decode a blockquote from a prefix-stripped LINE."
   (with-input-from-string (stream line)
-    (peek-char t stream nil) ;; skip all preceding whitespace
+    (peek-char t stream nil) ;; skip all preceding whitespace BUG:
+    ;; (read-line) will include whitespace at end of line. Perhaps
+    ;; create a herlper `string-right-trim-if' function?
     (blockquote (read-line stream nil ""))))
 
 (defun decode-verbatim (alt)
@@ -48,14 +52,12 @@
 
 ;; decode dispatch
 
-(defparameter *decoder-table* ())
+(defmacro define-prefix-table (var &body dispatches)
+  `(defparameter ,var
+     (list ,@(loop :for (prefix function) :in dispatches
+                   :collect `(cons ,prefix ,function)))))
 
-(defmacro push-prefix-dispatches (&body dispatches)
-  `(progn
-     ,@(loop :for (prefix function) :in dispatches
-             :collect `(push (cons ,prefix ,function) *decoder-table*))))
-
-(push-prefix-dispatches
+(define-prefix-table *prefix-table* ;; (defvar *prefix-table* ...)
   ("=>" 'decode-link)
   ("# " (curry 'heading 1))
   ("## " (curry 'heading 2))
@@ -65,7 +67,7 @@
   ("```" 'decode-verbatim))
 
 (defun find-decoder (line)
-  (dolist (dispatch-pair *decoder-table*)
+  (dolist (dispatch-pair *prefix-table*)
     (multiple-value-bind (starts-with-p suffix)
         (starts-with-subseq (car dispatch-pair) line :return-suffix t)
       (when starts-with-p
@@ -77,8 +79,8 @@
   (let ((line (read-line stream eof-error-p eof-value)))
     (multiple-value-bind (decoder line-suffix) (find-decoder line)
       (if decoder
-          (funcall decoder line-suffix)
-          line))))
+          (funcall decoder line-suffix) ;; call the decoder if a prefix is found.
+          line)))) ;; otherwise, return the text as-is.
 
 (defun decode-gemtext-from-string (string)
   "Read a line of gemtext from STRING and return the corresponding structured object."
