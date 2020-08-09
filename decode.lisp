@@ -5,16 +5,41 @@
 
 (defvar *gemtext-input* (make-synonym-stream '*standard-input*))
 
+;; read helper function
+
+(defvar +whitespacep+ (cl-unicode:property-test "whitespace")
+  "Whitespace character predicate")
+
+(defun read-until (test &optional (stream *standard-input*) (eof-error-p t) eof-value)
+  (loop :with result := (make-array 0 :element-type 'character :adjustable t)
+        :until (funcall test (peek-char nil stream eof-error-p eof-value))
+        :do (vector-push-extend (read-char stream) result)
+        :finally (return (copy-seq result)) ;; return a non-adjustable copy of the string
+        ))
 
 ;; special decoders
 
 (defun decode-link (line)
-  (declare (ignore line))
-  (error "Can't decode links yet"))
+  "Decode a gemtext link from a prefix-stripped LINE."
+  (with-input-from-string (stream line)
+    (peek-char t stream) ;; skip all whitepsace up until url
+    (let* ((href (read-until +whitespacep+ stream
+                             nil #\Newline)))
+      ;; skip more whitespace and read the label. If EOF, return early
+      ;; with no label.
+      (handler-case
+          (progn
+            (peek-char t stream)
+            ;; BUG: (read-line) will include whitespace at the end of
+            ;; the line. Perhaps create a helper
+            ;; `string-right-trim-if' function?
+            (link href (read-line stream)))
+        (end-of-file () (link href))))))
 
 (defun decode-verbatim (alt)
   (declare (ignore alt))
   (error "Can't decode verbatim yet"))
+
 
 ;; decode dispatch
 

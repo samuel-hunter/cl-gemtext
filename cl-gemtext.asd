@@ -5,7 +5,8 @@
   :author "Samuel Hunter"
   :license  "BSD 3-Clause"
   :version "0.0.1"
-  :depends-on (#:alexandria)
+  :depends-on (#:alexandria
+               #:cl-unicode)
   :serial t
   :components ((:file "package")
                (:file "data")
