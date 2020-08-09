@@ -1,13 +1,7 @@
-;;;; cl-gemtext.lisp
+;;;; gemtext.lisp
 
-(defpackage #:gemtext
-  (:nicknames #:cl-gemtext)
-  (:use #:cl)
-  (:export #:*gemtext-input*
-           #:decode-gemtext
-           #:decode-gemtext-from-string))
+(in-package #:gemtext)
 
-(in-package #:cl-gemtext)
 
 (defvar *gemtext-input* (make-synonym-stream '*standard-input*))
 
