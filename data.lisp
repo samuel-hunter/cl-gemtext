@@ -12,6 +12,14 @@
     (format stream "#<~S HREF=~S LABEL=~S>" 'gt-link href label)))
 
 
+(defclass gt-preformatted ()
+  ((alt :type string :initform "" :initarg :alt :accessor gt-alt)
+   (text :type string :initarg :text :accessor gt-text)))
+
+(defmethod print-object ((object gt-preformatted) stream)
+  (format stream "#<~S ALT=~S TEXT=~S>" 'gt-preformatted (gt-alt object) (gt-text object)))
+
+
 (defclass gt-heading ()
   ((level :type (integer 1 3) :initarg :level :accessor gt-level)
    (text :type string :initarg :text :accessor gt-text)))
@@ -33,11 +41,3 @@
 
 (defmethod print-object ((object gt-blockquote) stream)
   (format stream "#<~S TEXT=~S>" 'gt-blockquote (gt-text object)))
-
-
-(defclass gt-verbatim ()
-  ((alt :type string :initform "" :initarg :alt :accessor gt-alt)
-   (text :type string :initarg :text :accessor gt-text)))
-
-(defmethod print-object ((object gt-verbatim) stream)
-  (format stream "#<~S ALT=~S TEXT=~S>" 'gt-verbatim (gt-alt object) (gt-text object)))
