@@ -17,6 +17,27 @@
         :finally (return (copy-seq result)) ;; return a non-adjustable copy of the string
         ))
 
+;; string helper functions
+
+(defun string-left-trim-if-position (test string)
+  (or (position-if (complement test) string)
+      (length string)))
+
+(defun string-right-trim-if-position (test string &optional (start 0))
+  (1+ (or (position-if (complement test) string :from-end t :start start)
+          (1- start))))
+
+(defun string-left-trim-if (test string)
+  (subseq string (string-left-trim-if-position test string)))
+
+(defun string-right-trim-if (test string)
+  (subseq string 0 (string-right-trim-if-position test string)))
+
+(defun string-trim-if (test string)
+  (let* ((start (string-left-trim-if-position test string))
+         (end (string-right-trim-if-position test string start)))
+    (subseq string start end)))
+
 ;; TODO (defun string-trim-if ...)
 
 ;; special decoders
@@ -32,18 +53,13 @@
       (handler-case
           (progn
             (peek-char t stream)
-            ;; BUG: (read-line) will include whitespace at the end of
-            ;; the line. Perhaps create a helper
-            ;; `string-right-trim-if' function?
             (link href (read-line stream)))
         (end-of-file () (link href))))))
 
 (defun decode-blockquote (line)
   "Decode a blockquote from a prefix-stripped LINE."
   (with-input-from-string (stream line)
-    (peek-char t stream nil) ;; skip all preceding whitespace BUG:
-    ;; (read-line) will include whitespace at end of line. Perhaps
-    ;; create a herlper `string-right-trim-if' function?
+    (peek-char t stream nil) ;; skip all preceding whitespace
     (blockquote (read-line stream nil ""))))
 
 (defun decode-verbatim (alt)
@@ -74,15 +90,26 @@
         (return-from find-decoder (values (cdr dispatch-pair) suffix)))))
   (values nil nil))
 
-(defun decode-gemtext (&optional (stream *gemtext-input*) (eof-error-p t) eof-value)
-  "Read a line of gemtext from STREAM and return the corresponding structured object."
+(defun decode-gemtext (&optional (stream *gemtext-input*) (trim-string-p t)
+                         (eof-error-p t) eof-value)
+  "Read a line of gemtext from STREAM and return the corresponding structured object.
+
+If TRIM-STRING-P, trim the text of any leading or trailing whitespace."
   (let ((line (read-line stream eof-error-p eof-value)))
     (multiple-value-bind (decoder line-suffix) (find-decoder line)
       (if decoder
-          (funcall decoder line-suffix) ;; call the decoder if a prefix is found.
-          line)))) ;; otherwise, return the text as-is.
+          ;; call the decoder if a prefix is found.
+          (funcall decoder
+                   (if trim-string-p
+                       (string-trim-if +whitespacep+ line-suffix)
+                       line-suffix))
+           ;; otherwise, return the text as-is.
+          (if trim-string-p
+              (string-trim-if +whitespacep+ line)
+              line)))))
 
-(defun decode-gemtext-from-string (string)
+(defun decode-gemtext-from-string (string &optional (trim-string-p t)
+                                            (eof-error-p t) eof-value)
   "Read a line of gemtext from STRING and return the corresponding structured object."
   (with-input-from-string (stream string)
-    (decode-gemtext stream)))
+    (decode-gemtext stream trim-string-p eof-error-p eof-value)))
