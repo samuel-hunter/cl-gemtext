@@ -1,7 +1,7 @@
 ;;;; cl-gemtext.asd
 
 (asdf:defsystem #:cl-gemtext
-  :description "Decode the Gemini Protocol's gemtext markup into structuerd data."
+  :description "Decode the Gemini Protocol's gemtext markup into structured data."
   :author "Samuel Hunter"
   :license  "BSD 3-Clause"
   :version "0.0.1"

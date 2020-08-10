@@ -2,9 +2,9 @@
 ### _Samuel Hunter_
 
 A library for decoding the Gemini Protocol's gemtext markup into
-structuerd data.
+structured data.
 
-Currently doesn't exist.
+Currently incomplete.
 
 ## Future Usage
 
