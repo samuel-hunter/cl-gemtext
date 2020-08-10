@@ -40,7 +40,7 @@
 
 ;; TODO (defun string-trim-if ...)
 
-;; special decoders
+;; decoders
 
 (defun decode-link (line)
   "Decode a gemtext link from a prefix-stripped LINE."
@@ -53,14 +53,18 @@
       (handler-case
           (progn
             (peek-char t stream)
-            (link href (read-line stream)))
-        (end-of-file () (link href))))))
+            (make-instance 'link :href href :label (read-line stream)))
+        (end-of-file () (make-instance 'link :href href))))))
+
+(defun decode-heading (level line)
+  (make-instance 'heading :level level :text line))
+
+(defun decode-listitem (line)
+  (make-instance 'listitem :text line))
 
 (defun decode-blockquote (line)
   "Decode a blockquote from a prefix-stripped LINE."
-  (with-input-from-string (stream line)
-    (peek-char t stream nil) ;; skip all preceding whitespace
-    (blockquote (read-line stream nil ""))))
+  (make-instance 'blockquote :text line))
 
 (defun decode-verbatim (alt)
   (declare (ignore alt))
@@ -75,10 +79,10 @@
 
 (define-prefix-table *prefix-table* ;; (defvar *prefix-table* ...)
   ("=>" 'decode-link)
-  ("# " (curry 'heading 1))
-  ("## " (curry 'heading 2))
-  ("### " (curry 'heading 3))
-  ("* " 'listitem)
+  ("# " (curry 'decode-heading 1))
+  ("## " (curry 'decode-heading 2))
+  ("### " (curry 'decode-heading 3))
+  ("* " 'decode-listitem)
   (">" 'decode-blockquote)
   ("```" 'decode-verbatim))
 
