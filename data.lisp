@@ -26,7 +26,7 @@
 
 (defmethod print-object ((object gt-heading) stream)
   (with-slots (level text) object
-    (format stream "#<~S LEVEL=~D TEXT=~S" 'gt-heading level text)))
+    (format stream "#<~S LEVEL=~D TEXT=~S>" 'gt-heading level text)))
 
 
 (defclass gt-listitem ()
@@ -36,8 +36,8 @@
   (format stream "#<~S TEXT=~S>" 'gt-listitem (gt-text object)))
 
 
-(defclass gt-blockquote ()
+(defclass gt-quote ()
   ((text :type string :initarg :text :accessor gt-text)))
 
-(defmethod print-object ((object gt-blockquote) stream)
-  (format stream "#<~S TEXT=~S>" 'gt-blockquote (gt-text object)))
+(defmethod print-object ((object gt-quote) stream)
+  (format stream "#<~S TEXT=~S>" 'gt-quote (gt-text object)))

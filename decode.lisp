@@ -54,6 +54,26 @@
                                         :alt alt
                                         :text result))))
 
+(defvar +gemtext-max-heading-level+ 3)
+
+(defun decode-heading ()
+  (loop :with level := 1
+        :repeat (1- +gemtext-max-heading-level+)
+        :while (char= (peek-char nil *gemtext-input* nil #\Newline) #\#)
+        :do (progn (incf level)
+                   (read-char *gemtext-input*))
+        :finally (progn
+                   (skip-whitespace *gemtext-input*)
+                   (return (make-instance 'gt-heading
+                                          :level level
+                                          :text (read-line *gemtext-input* nil ""))))))
+
+(defun decode-listitem ()
+  (make-instance 'gt-listitem :text (read-line *gemtext-input* nil "")))
+
+(defun decode-quote ()
+  (make-instance 'gt-quote :text (read-line *gemtext-input* nil "")))
+
 ;; Prefix table
 
 ;; "It is possible to unambiguously determine a line's type purely by
@@ -63,7 +83,10 @@
 (defparameter *prefix-table*
   (plist-hash-table
    '("=>" decode-link
-     "```" decode-preformatted)
+     "```" decode-preformatted
+     "#" decode-heading
+     "* " decode-listitem
+     ">" decode-quote)
    :test 'equal))
 
 (defun decoder (prefix)
