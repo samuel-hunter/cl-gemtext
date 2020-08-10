@@ -5,7 +5,7 @@
 
 (defvar *gemtext-input* (make-synonym-stream '*standard-input*))
 
-;; read helper function
+;; string/read helper functions
 
 (defvar +whitespacep+ (cl-unicode:property-test "whitespace")
   "Whitespace character predicate")
@@ -29,9 +29,23 @@
               stream nil #\Newline)
   (values))
 
+(defun trim-whitespace (string)
+  (let* ((start (position-if-not +whitespacep+ string))
+         (end (and start (1+ (position-if-not +whitespacep+ string
+                                              :from-end t :start start)))))
+    (if start
+        (subseq string start end)
+        "")))
+
+(declaim (inline trim-when))
+(defun trim-if (bool string)
+  (if bool
+      (trim-whitespace string)
+      string))
+
 ;; decoders
 
-(defun decode-link ()
+(defun decode-link (trim-whitespace-p)
   (skip-whitespace *gemtext-input*)
   (let ((href (read-until +whitespacep+ *gemtext-input* nil #\Newline)))
     (handler-case
@@ -39,11 +53,13 @@
           (skip-whitespace *gemtext-input*)
           (make-instance 'gt-link
                          :href href
-                         :label (read-line *gemtext-input*)))
+                         :label (trim-if trim-whitespace-p
+                                         (read-line *gemtext-input* nil ""))))
       (end-of-file () (make-instance 'gt-link :href href)))))
 
-(defun decode-preformatted ()
-  (loop :with alt := (read-line *gemtext-input* nil "")
+(defun decode-preformatted (trim-whitespace-p)
+  (loop :with alt := (trim-if trim-whitespace-p
+                              (read-line *gemtext-input* nil ""))
         :with result := ""
         :for (line missing-newline-p)
           := (multiple-value-list (read-line *gemtext-input* nil "```"))
@@ -56,7 +72,7 @@
 
 (defvar +gemtext-max-heading-level+ 3)
 
-(defun decode-heading ()
+(defun decode-heading (trim-whitespace-p)
   (loop :with level := 1
         :repeat (1- +gemtext-max-heading-level+)
         :while (char= (peek-char nil *gemtext-input* nil #\Newline) #\#)
@@ -64,15 +80,21 @@
                    (read-char *gemtext-input*))
         :finally (progn
                    (skip-whitespace *gemtext-input*)
-                   (return (make-instance 'gt-heading
-                                          :level level
-                                          :text (read-line *gemtext-input* nil ""))))))
+                   (return (make-instance
+                            'gt-heading
+                            :level level
+                            :text (trim-if trim-whitespace-p
+                                           (read-line *gemtext-input* nil "")))))))
 
-(defun decode-listitem ()
-  (make-instance 'gt-listitem :text (read-line *gemtext-input* nil "")))
+(defun decode-listitem (trim-whitespace-p)
+  (make-instance 'gt-listitem
+                 :text (trim-if trim-whitespace-p
+                                (read-line *gemtext-input* nil ""))))
 
-(defun decode-quote ()
-  (make-instance 'gt-quote :text (read-line *gemtext-input* nil "")))
+(defun decode-quote (trim-whitespace-p)
+  (make-instance 'gt-quote
+                 :text (trim-if trim-whitespace-p
+                                (read-line *gemtext-input* nil ""))))
 
 ;; Prefix table
 
@@ -94,7 +116,7 @@
 
 ;; Dispatch gemtext decoding
 
-(defun decode-gemtext (&optional (stream *gemtext-input*))
+(defun decode-gemtext (&optional (stream *gemtext-input*) (trim-whitespace-p t))
   "Read a line of gemtext from STREAM and return the corresponding structured object.
 
 If TRIM-STRING-P, trim the text of any leading or trailing whitespace."
@@ -109,12 +131,27 @@ If TRIM-STRING-P, trim the text of any leading or trailing whitespace."
           ;; If a decoder is found, return the result of that.
           :do (vector-push char prefix)
           :do (when-let ((decoder (decoder prefix)))
-                (return (funcall decoder)))
+                (return (funcall decoder trim-whitespace-p)))
               ;; If no prefix is found, read the rest of the line and
               ;; return the result.
-          :finally (return (concatenate 'string prefix (read-line *gemtext-input*))))))
+          :finally (return (trim-if trim-whitespace-p
+                                    (concatenate 'string prefix
+                                                 (read-line *gemtext-input*)))))))
 
-(defun decode-gemtext-from-string (string)
+(defun decode-gemtext-from-string (string &optional (trim-whitespace-p t))
   "Read a line of gemtext from STRING and return the corresponding structured object."
   (with-input-from-string (stream string)
-    (decode-gemtext stream)))
+    (decode-gemtext stream trim-whitespace-p)))
+
+(defun decode-gemtext-lines (&optional (stream *gemtext-input*) (trim-whitespace-p t))
+  "Keep reading lines from STREAM until END-OF-LINE is signaled, and then
+return a list of the corresponding objects."
+  (let (lines)
+    (handler-case
+        (loop (push (decode-gemtext stream trim-whitespace-p) lines))
+      (end-of-file () (reverse lines)))))
+
+(defun decode-gemtext-lines-from-string (string &optional (trim-whitespace-p t))
+  "Read all lines from STRING and then return a list of the corresponding objects."
+  (with-input-from-string (stream string)
+    (decode-gemtext-lines stream trim-whitespace-p)))

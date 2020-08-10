@@ -19,4 +19,6 @@
            #:gt-text
            ;; coding
            #:decode-gemtext
-           #:decode-gemtext-from-string))
+           #:decode-gemtext-from-string
+           #:decode-gemtext-lines
+           #:decode-gemtext-lines-from-string))
