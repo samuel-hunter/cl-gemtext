@@ -10,9 +10,9 @@ Currently incomplete.
 
 ```lisp
 * (require :cl-gemtext)
-* (decode-gemtext *standard-input*)
+* (decode-gemtext-line *standard-input*)
 #<some form of gemtext structure>
-* (decode-gemtext-from-string "Gemtext data")
+* (decode-gemtext-line-from-string "Gemtext data")
 #<some form of gemtext structure>
 ```
 

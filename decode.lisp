@@ -116,7 +116,7 @@
 
 ;; Dispatch gemtext decoding
 
-(defun decode-gemtext (&optional (stream *gemtext-input*) (trim-whitespace-p t))
+(defun decode-gemtext-line (&optional (stream *gemtext-input*) (trim-whitespace-p t))
   "Read a line of gemtext from STREAM and return the corresponding structured object.
 
 If TRIM-STRING-P, trim the text of any leading or trailing whitespace."
@@ -138,20 +138,20 @@ If TRIM-STRING-P, trim the text of any leading or trailing whitespace."
                                     (concatenate 'string prefix
                                                  (read-line *gemtext-input*)))))))
 
-(defun decode-gemtext-from-string (string &optional (trim-whitespace-p t))
+(defun decode-gemtext-line-from-string (string &optional (trim-whitespace-p t))
   "Read a line of gemtext from STRING and return the corresponding structured object."
   (with-input-from-string (stream string)
     (decode-gemtext stream trim-whitespace-p)))
 
-(defun decode-gemtext-lines (&optional (stream *gemtext-input*) (trim-whitespace-p t))
+(defun decode-gemtext (&optional (stream *gemtext-input*) (trim-whitespace-p t))
   "Keep reading lines from STREAM until END-OF-LINE is signaled, and then
 return a list of the corresponding objects."
   (let (lines)
     (handler-case
-        (loop (push (decode-gemtext stream trim-whitespace-p) lines))
+        (loop (push (decode-gemtext-line stream trim-whitespace-p) lines))
       (end-of-file () (reverse lines)))))
 
-(defun decode-gemtext-lines-from-string (string &optional (trim-whitespace-p t))
+(defun decode-gemtext-from-string (string &optional (trim-whitespace-p t))
   "Read all lines from STRING and then return a list of the corresponding objects."
   (with-input-from-string (stream string)
-    (decode-gemtext-lines stream trim-whitespace-p)))
+    (decode-gemtext stream trim-whitespace-p)))

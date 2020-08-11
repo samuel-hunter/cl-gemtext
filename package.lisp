@@ -18,7 +18,7 @@
            #:gt-level
            #:gt-text
            ;; coding
+           #:decode-gemtext-line
+           #:decode-gemtext-line-from-string
            #:decode-gemtext
-           #:decode-gemtext-from-string
-           #:decode-gemtext-lines
-           #:decode-gemtext-lines-from-string))
+           #:decode-gemtext-from-string))
