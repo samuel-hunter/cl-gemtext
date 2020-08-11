@@ -1,10 +1,12 @@
 ;;;; package.lisp
 
 (defpackage #:gemtext
-  (:documentation "Decode the Gemini Protocol's gemtext markup into structured data.")
+  (:documentation
+   "Decode the Gemini Protocol's gemtext markup into structured data.")
   (:nicknames #:cl-gemtext)
   (:use #:cl #:alexandria)
-  (:export #:*gemtext-input*
+  (:export #:+gemini-version+
+           #:*gemtext-input*
            ;; classes
            #:gt-link
            #:gt-heading
@@ -17,7 +19,7 @@
            #:gt-alt
            #:gt-level
            #:gt-text
-           ;; coding
+           ;; decoding
            #:decode-gemtext-line
            #:decode-gemtext-line-from-string
            #:decode-gemtext
