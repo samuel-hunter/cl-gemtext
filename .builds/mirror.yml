@@ -1,0 +1,16 @@
+image: alpine/edge
+repositories: {}
+environment:
+ mirror: git@github.com:samuel-hunter/cl-gemtext.git
+ GIT_SSH_COMMAND: ssh -o StrictHostKeyChecking=no
+secrets:
+- 2dce3aef-7e67-4051-b1e6-71eedeb7e7d8
+shell: false
+sources:
+- https://git.sr.ht/~shunter/cl-gemtext
+tasks:
+- updatemirror: |
+    cd cl-gemtext
+    git remote add mirror $mirror
+    git push mirror master
+triggers: []
