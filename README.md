@@ -1,8 +1,9 @@
 # cl-gemtext
-### _Samuel Hunter_
 
 A library for decoding the Gemini Protocol's gemtext markup into
 structured data.
+
+---
 
 Project Gemini is a semi-recent internet protocol protject that
 describes itself as somewhere between Gopher and the convnetional
