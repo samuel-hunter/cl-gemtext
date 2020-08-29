@@ -13,7 +13,7 @@
 ;; won't become totally non-functional due to massive changes next
 ;; week, but you are still urged to keep an eye on ongoing development
 ;; of the protocol and make changes as required.
-(defvar +gemini-version+ '(0 14 2)
+(defvar +gemtext-version+ '(0 14 2)
   "The major version, minor version, and patchlevel of the latest-supported gemini protocol.")
 
 (defclass gt-link ()
