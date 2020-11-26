@@ -11,7 +11,7 @@
            #:gt-link
            #:gt-heading
            #:gt-listitem
-           #:gt-blockquote
+           #:gt-quote
            #:gt-preformatted
            ;; accessors
            #:gt-href
