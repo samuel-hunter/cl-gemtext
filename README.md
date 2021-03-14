@@ -3,14 +3,21 @@
 A library for decoding the Gemini Protocol's gemtext markup into
 structured data.
 
+**NOTE:** cl-gemtext (and the main project
+[retrorocket](https://sr.ht/~shunter/retrorocket/)) has been defunct
+since November 29, 2020 (Gemini v0.14.3). This project was not meant
+to be a serious, maintained library, but rather to help in developing
+Retrorocket to see if the UI toolkit McCLIM is a good match for me.
+
 ---
 
-Project Gemini is a semi-recent internet protocol protject that
-describes itself as somewhere between Gopher and the convnetional
-Web. Much like how HTML is the native respones format for HTTP, Gemini
-houses its own native response -- a markup format named "gemtext",
-which is parsed line-by-line. If you're unfamiliar with Project Gemini
-and want to learn more, I recommend reading the de-facto homepage in
+Project Gemini is a relatively recent (and actively developed)
+internet protocol protject that describes itself as somewhere between
+Gopher and the convnetional Web. Much like how HTML is the native
+respones format for HTTP, Gemini houses its own native response -- a
+markup format named "gemtext", which is parsed line-by-line. If you're
+unfamiliar with Project Gemini and want to learn more, I recommend
+reading the de-facto homepage in
 [HTTP](https://gemini.circumlunar.space/) or in
 [Gemini](gemini://gemini.circumlunar.space/) [(Mozz.us
 Proxy)](https://portal.mozz.us/gemini/gemini.circumlunar.space/).
